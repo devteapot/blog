@@ -15,8 +15,24 @@
 	--border-hover: #444444;
 	--accent: #ffffff;
 	--accent-muted: #a1a1a1;
-	--code-bg: #111111;
+	--code-bg: #0a0a0a;
 	--selection: rgba(255, 130, 160, 0.5);
+
+	/* Shiki css-variables theme — monochrome, matches the shell */
+	--astro-code-foreground: var(--fg);
+	--astro-code-background: transparent;
+	--astro-code-token-constant: var(--fg-muted);
+	--astro-code-token-string: var(--accent-muted);
+	--astro-code-token-comment: var(--fg-subtle);
+	--astro-code-token-keyword: var(--fg);
+	--astro-code-token-parameter: var(--fg-muted);
+	--astro-code-token-function: var(--fg);
+	--astro-code-token-string-expression: var(--accent-muted);
+	--astro-code-token-punctuation: var(--fg-subtle);
+	--astro-code-token-link: var(--accent-muted);
+	--astro-code-token-inserted: var(--accent-muted);
+	--astro-code-token-deleted: var(--fg-subtle);
+	--astro-code-token-changed: var(--fg-muted);
 
 	--radius: 6px;
 	--sidebar-width: 260px;
@@ -229,27 +245,43 @@ samp {
 }
 
 code {
-	padding: 0.15em 0.4em;
+	padding: 0.15em 0.35em;
 	background-color: var(--code-bg);
 	border: 1px solid var(--border);
 	border-radius: 4px;
 	color: var(--fg);
+	font-size: 0.84em;
 }
 
-pre {
-	padding: 1.25em 1.35em;
+pre,
+pre.astro-code {
+	padding: 1rem 1.15rem;
 	border-radius: var(--radius);
 	border: 1px solid var(--border);
-	background: var(--code-bg);
+	background: var(--code-bg) !important;
+	color: var(--fg) !important;
 	overflow-x: auto;
-	line-height: 1.55;
+	line-height: 1.6;
 	margin: 0 0 1.5em;
+	font-size: 0.8125rem;
+	box-shadow: none;
 }
 
-pre > code {
+pre > code,
+pre.astro-code > code {
 	all: unset;
 	font-family: inherit;
-	font-size: 0.875rem;
+	font-size: inherit;
+	background: transparent;
+	border: none;
+	padding: 0;
+	color: inherit;
+}
+
+/* Soften Shiki spans so tokens stay in the grayscale system */
+.astro-code span {
+	font-style: normal !important;
+	text-decoration: none !important;
 }
 
 blockquote {

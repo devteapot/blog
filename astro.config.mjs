@@ -8,6 +8,12 @@ import { defineConfig, fontProviders } from 'astro/config';
 export default defineConfig({
 	site: 'https://example.com',
 	integrations: [mdx(), sitemap()],
+	markdown: {
+		shikiConfig: {
+			// Token colors come from --astro-code-* CSS vars (see global.css)
+			theme: 'css-variables',
+		},
+	},
 	fonts: [
 		{
 			provider: fontProviders.fontsource(),
