@@ -193,7 +193,12 @@ const viewBoxes: Record<string, string> = {
 		padding-right: var(--rail-gutter);
 	}
 
-	/* Single rail line at the content edge — all dots center here */
+	/*
+	 * Rail axis = content edge (right: gutter). Both the 1px line and the
+	 * dots use translateX(50%) so their centers share that axis — without
+	 * it the line’s right edge sits on the axis and looks 0.5px off-center
+	 * (a full device pixel on retina).
+	 */
 	.timeline::before {
 		content: '';
 		position: absolute;
@@ -202,6 +207,7 @@ const viewBoxes: Record<string, string> = {
 		right: var(--rail-gutter);
 		width: 1px;
 		background: var(--border);
+		transform: translateX(50%);
 		pointer-events: none;
 	}
 
@@ -279,8 +285,8 @@ const viewBoxes: Record<string, string> = {
 	}
 
 	/*
-	 * In-flow flex item (not absolute). Sitting as the last child of a
-	 * full-width-to-rail row, translateX(50%) parks the center on the line.
+	 * In-flow flex item at the content edge. translateX(50%) parks the
+	 * center on the same rail axis as .timeline::before.
 	 */
 	.rail-node {
 		display: block;
