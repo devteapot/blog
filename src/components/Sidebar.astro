@@ -63,7 +63,12 @@ const viewBoxes: Record<string, string> = {
 
 <aside class="sidebar">
 	<div class="identity">
-		<a class="name" href="/">{SITE_TITLE}</a>
+		<div class="identity-text">
+			<a class="name" href="/">{SITE_TITLE}</a>
+			<p class="pronunciation" lang="und-Latn-fonipa" title="Pronunciation">
+				/diˈɛɡɔ/ /karˈli.no/
+			</p>
+		</div>
 		<div class="social">
 			{
 				SOCIAL_LINKS.map((link) => (
@@ -126,6 +131,10 @@ const viewBoxes: Record<string, string> = {
 		border-bottom: var(--line);
 	}
 
+	.identity-text {
+		min-width: 0;
+	}
+
 	.name {
 		display: block;
 		font-size: 0.9375rem;
@@ -139,6 +148,15 @@ const viewBoxes: Record<string, string> = {
 	.name:hover {
 		opacity: 0.75;
 		text-decoration: none;
+	}
+
+	.pronunciation {
+		margin: 0.2rem 0 0;
+		font-size: 0.75rem;
+		font-weight: 400;
+		line-height: 1.3;
+		letter-spacing: 0.01em;
+		color: var(--fg-subtle);
 	}
 
 	.social {
