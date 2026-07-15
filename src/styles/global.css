@@ -1,124 +1,318 @@
 /*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
- */
+  Minimal Vercel / X-inspired dark theme.
+  Two-column shell with dashed layout frame.
+*/
 
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
-	--black: 15, 18, 25;
-	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
-	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
-	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
-		0 16px 32px rgba(var(--gray), 33%);
+	color-scheme: dark;
+
+	--bg: #000000;
+	--bg-elevated: #0a0a0a;
+	--fg: #ededed;
+	--fg-muted: #888888;
+	--fg-subtle: #666666;
+	--border: #333333;
+	--border-hover: #444444;
+	--accent: #ffffff;
+	--accent-muted: #a1a1a1;
+	--code-bg: #111111;
+	--selection: rgba(255, 130, 160, 0.5);
+
+	--radius: 6px;
+	--sidebar-width: 260px;
+	--shell-max: 1100px;
+	--line: 1px solid var(--border);
 }
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+::selection {
+	background: var(--selection);
+}
+
+html {
+	background: var(--bg);
+}
+
 body {
-	font-family: var(--font-atkinson);
+	font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
 	margin: 0;
 	padding: 0;
+	min-height: 100vh;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
+	background: var(--bg);
+	color: var(--fg);
+	font-size: 16px;
+	line-height: 1.65;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
-	font-size: 20px;
-	line-height: 1.7;
 }
-main {
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
+
+/* ——— App shell ——— */
+.shell {
+	display: grid;
+	grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+	max-width: var(--shell-max);
+	min-height: 100vh;
+	margin: 0 auto;
+	border-inline: var(--line);
 }
+
+.sidebar {
+	display: flex;
+	flex-direction: column;
+	border-right: var(--line);
+	min-height: 100vh;
+	position: sticky;
+	top: 0;
+	align-self: start;
+	max-height: 100vh;
+	overflow-y: auto;
+}
+
+.content {
+	min-width: 0;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.content-header {
+	padding: 1rem 2.25rem;
+	border-bottom: var(--line);
+	min-height: 3.25rem;
+	display: flex;
+	align-items: center;
+}
+
+.content-header h1 {
+	margin: 0;
+	font-size: 0.9375rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	line-height: 1.35;
+	color: var(--fg);
+}
+
+.content-inner {
+	flex: 1;
+	padding: 2rem 2.25rem 3rem;
+}
+
+.content-footer {
+	border-top: var(--line);
+	padding: 1rem 2.25rem;
+	font-size: 0.75rem;
+	color: var(--fg-subtle);
+}
+
+/* ——— Typography ——— */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
-	line-height: 1.2;
+	margin: 0 0 0.6rem 0;
+	color: var(--fg);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.25;
 }
+
 h1 {
-	font-size: 3.052em;
+	font-size: 2rem;
+	letter-spacing: -0.04em;
 }
+
 h2 {
-	font-size: 2.441em;
+	font-size: 1.5rem;
+	letter-spacing: -0.03em;
 }
+
 h3 {
-	font-size: 1.953em;
+	font-size: 1.25rem;
 }
+
 h4 {
-	font-size: 1.563em;
+	font-size: 1.125rem;
 }
+
 h5 {
-	font-size: 1.25em;
+	font-size: 1rem;
 }
+
+h6 {
+	font-size: 0.875rem;
+	color: var(--fg-muted);
+	font-weight: 500;
+	letter-spacing: 0;
+}
+
 strong,
 b {
-	font-weight: 700;
+	font-weight: 600;
 }
+
 a {
-	color: var(--accent);
+	color: var(--fg);
+	text-decoration: underline;
+	text-decoration-color: var(--border);
+	text-underline-offset: 3px;
+	transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
+
 a:hover {
 	color: var(--accent);
+	text-decoration-color: var(--fg-muted);
 }
+
 p {
-	margin-bottom: 1em;
+	margin: 0 0 1.25em;
 }
+
 .prose p {
-	margin-bottom: 2em;
+	margin-bottom: 1.5em;
 }
-textarea {
-	width: 100%;
-	font-size: 16px;
+
+.prose a {
+	color: var(--fg);
+	text-decoration-color: var(--fg-muted);
 }
+
+.prose a:hover {
+	text-decoration-color: var(--fg);
+}
+
+textarea,
 input {
 	font-size: 16px;
+	font-family: inherit;
 }
+
 table {
 	width: 100%;
+	border-collapse: collapse;
 }
+
+th,
+td {
+	border-bottom: 1px solid var(--border);
+	padding: 0.6em 0.75em;
+	text-align: left;
+}
+
+th {
+	color: var(--fg-muted);
+	font-weight: 500;
+	font-size: 0.875rem;
+}
+
 img {
 	max-width: 100%;
 	height: auto;
-	border-radius: 8px;
+	border-radius: var(--radius);
 }
+
+code,
+pre,
+kbd,
+samp {
+	font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.875em;
+}
+
 code {
-	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
+	padding: 0.15em 0.4em;
+	background-color: var(--code-bg);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	color: var(--fg);
 }
+
 pre {
-	padding: 1.5em;
-	border-radius: 8px;
+	padding: 1.25em 1.35em;
+	border-radius: var(--radius);
+	border: 1px solid var(--border);
+	background: var(--code-bg);
+	overflow-x: auto;
+	line-height: 1.55;
+	margin: 0 0 1.5em;
 }
+
 pre > code {
 	all: unset;
+	font-family: inherit;
+	font-size: 0.875rem;
 }
+
 blockquote {
-	border-left: 4px solid var(--accent);
-	padding: 0 0 0 20px;
-	margin: 0;
-	font-size: 1.333em;
+	border-left: 2px solid var(--border);
+	padding: 0 0 0 1.25em;
+	margin: 0 0 1.5em;
+	color: var(--fg-muted);
+	font-size: 1.05em;
 }
+
 hr {
 	border: none;
-	border-top: 1px solid rgb(var(--gray-light));
+	border-top: var(--line);
+	margin: 2em 0;
 }
-@media (max-width: 720px) {
+
+ul,
+ol {
+	padding-left: 1.35em;
+	margin: 0 0 1.25em;
+}
+
+li {
+	margin-bottom: 0.35em;
+}
+
+@media (max-width: 800px) {
 	body {
-		font-size: 18px;
+		font-size: 15px;
 	}
-	main {
-		padding: 1em;
+
+	.shell {
+		grid-template-columns: 1fr;
+		border-inline: none;
+		min-height: auto;
+	}
+
+	.sidebar {
+		min-height: auto;
+		max-height: none;
+		position: relative;
+		border-right: none;
+		border-bottom: var(--line);
+	}
+
+	.content {
+		min-height: auto;
+	}
+
+	.content-header {
+		padding: 0.875rem 1.25rem;
+	}
+
+	.content-inner {
+		padding: 1.5rem 1.25rem 2.5rem;
+	}
+
+	.content-footer {
+		padding: 1rem 1.25rem;
+	}
+
+	h1 {
+		font-size: 1.75rem;
 	}
 }
 
@@ -130,12 +324,8 @@ hr {
 	height: 1px;
 	width: 1px;
 	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
 	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
 	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
 	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }

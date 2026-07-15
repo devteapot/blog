@@ -1,0 +1,41 @@
+---
+import type { ImageMetadata } from 'astro';
+import BaseHead from '../components/BaseHead.astro';
+import Sidebar from '../components/Sidebar.astro';
+
+interface Props {
+	title: string;
+	description: string;
+	image?: ImageMetadata;
+	/** Shown in the top content bar (defaults to title). */
+	pageTitle?: string;
+}
+
+const { title, description, image, pageTitle = title } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} image={image} />
+	</head>
+	<body>
+		<div class="shell">
+			<Sidebar />
+			<div class="content">
+				<header class="content-header">
+					<slot name="header">
+						<h1>{pageTitle}</h1>
+					</slot>
+				</header>
+				<div class="content-inner">
+					<slot />
+				</div>
+				<footer class="content-footer">
+					&copy; {year} Diego Carlino
+				</footer>
+			</div>
+		</div>
+	</body>
+</html>

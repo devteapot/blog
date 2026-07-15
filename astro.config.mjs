@@ -10,26 +10,20 @@ export default defineConfig({
 	integrations: [mdx(), sitemap()],
 	fonts: [
 		{
-			provider: fontProviders.local(),
-			name: 'Atkinson',
-			cssVariable: '--font-atkinson',
+			provider: fontProviders.fontsource(),
+			name: 'Geist',
+			cssVariable: '--font-geist-sans',
 			fallbacks: ['sans-serif'],
-			options: {
-				variants: [
-					{
-						src: ['./src/assets/fonts/atkinson-regular.woff'],
-						weight: 400,
-						style: 'normal',
-						display: 'swap',
-					},
-					{
-						src: ['./src/assets/fonts/atkinson-bold.woff'],
-						weight: 700,
-						style: 'normal',
-						display: 'swap',
-					},
-				],
-			},
+			styles: ['normal'],
+			weights: ['100 900'],
+		},
+		{
+			provider: fontProviders.fontsource(),
+			name: 'Geist Mono',
+			cssVariable: '--font-geist-mono',
+			fallbacks: ['ui-monospace', 'monospace'],
+			styles: ['normal'],
+			weights: ['100 900'],
 		},
 	],
 });
