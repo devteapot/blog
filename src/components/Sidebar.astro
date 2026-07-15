@@ -1,10 +1,50 @@
 ---
 import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import { SITE_TITLE, SOCIAL_LINKS } from '../consts';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short' });
+
+type MonthGroup = {
+	month: number;
+	label: string;
+	posts: CollectionEntry<'blog'>[];
+};
+
+type YearGroup = {
+	year: number;
+	months: MonthGroup[];
+};
+
+const grouped: YearGroup[] = [];
+
+for (const post of posts) {
+	const date = post.data.pubDate;
+	const year = date.getFullYear();
+	const month = date.getMonth();
+
+	let yearGroup = grouped.find((g) => g.year === year);
+	if (!yearGroup) {
+		yearGroup = { year, months: [] };
+		grouped.push(yearGroup);
+	}
+
+	let monthGroup = yearGroup.months.find((m) => m.month === month);
+	if (!monthGroup) {
+		monthGroup = {
+			month,
+			label: monthFormatter.format(date),
+			posts: [],
+		};
+		yearGroup.months.push(monthGroup);
+	}
+
+	monthGroup.posts.push(post);
+}
 
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 
@@ -42,21 +82,39 @@ const viewBoxes: Record<string, string> = {
 
 	<nav class="posts-nav" aria-label="Articles">
 		<p class="posts-label">Articles</p>
-		<ul>
+		<div class="timeline">
 			{
-				posts.map((post) => {
-					const href = `/blog/${post.id}`;
-					const isActive = pathname === href || pathname === `${href}/`;
-					return (
-						<li>
-							<a href={`${href}/`} class:list={{ active: isActive }}>
-								{post.data.title}
-							</a>
-						</li>
-					);
-				})
+				grouped.map((yearGroup) => (
+					<section class="year-group">
+						<div class="year-row">
+							<span class="year-heading">{yearGroup.year}</span>
+							<span class="rail-node year-node" aria-hidden="true" />
+						</div>
+						{yearGroup.months.map((monthGroup) => (
+							<div class="month-group">
+								<ul class="post-list">
+									{monthGroup.posts.map((post) => {
+										const href = `/blog/${post.id}`;
+										const isActive = pathname === href || pathname === `${href}/`;
+										return (
+											<li>
+												<a href={`${href}/`} class:list={{ active: isActive }}>
+													{post.data.title}
+												</a>
+											</li>
+										);
+									})}
+								</ul>
+								<div class="month-meta">
+									<span class="month-heading">{monthGroup.label}</span>
+									<span class="rail-node month-node" aria-hidden="true" />
+								</div>
+							</div>
+						))}
+					</section>
+				))
 			}
-		</ul>
+		</div>
 	</nav>
 </aside>
 
@@ -107,13 +165,16 @@ const viewBoxes: Record<string, string> = {
 	}
 
 	.posts-nav {
-		padding: 1.25rem 0.75rem 1.5rem 1.25rem;
+		/* date column + room for rail dots past the line */
+		--rail-col: 2.75rem;
+		--node-year: 6px;
+		--node-month: 4px;
+		padding: 1.25rem 0.85rem 1.5rem 1.15rem;
 		flex: 1;
 	}
 
 	.posts-label {
-		margin: 0 0 0.65rem;
-		padding-right: 0.5rem;
+		margin: 0 0 0.85rem;
 		font-size: 0.6875rem;
 		font-weight: 500;
 		letter-spacing: 0.06em;
@@ -121,10 +182,121 @@ const viewBoxes: Record<string, string> = {
 		color: var(--fg-subtle);
 	}
 
-	.posts-nav ul {
+	.timeline {
+		/* content ends at the rail; dots hang into this gutter */
+		--rail-gutter: 0.5rem;
+		position: relative;
+		padding-right: var(--rail-gutter);
+	}
+
+	/* Single rail line at the content edge — all dots center here */
+	.timeline::before {
+		content: '';
+		position: absolute;
+		top: 0.2rem;
+		bottom: 0.2rem;
+		right: var(--rail-gutter);
+		width: 1px;
+		background: var(--border);
+		pointer-events: none;
+	}
+
+	.year-group {
+		margin: 0;
+	}
+
+	.year-group + .year-group {
+		margin-top: 0.35rem;
+	}
+
+	.year-row {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.4rem;
+		min-height: 1.25rem;
+		margin: 0.7rem 0 0.35rem;
+	}
+
+	.year-group:first-child .year-row {
+		margin-top: 0;
+	}
+
+	.year-heading {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		line-height: 1.2;
+		text-align: right;
+		color: var(--fg-muted);
+	}
+
+	.month-group {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		margin: 0 0 0.5rem;
+	}
+
+	.post-list {
+		flex: 1 1 auto;
+		min-width: 0;
 		list-style: none;
 		margin: 0;
 		padding: 0;
+	}
+
+	/*
+	 * Label + dot share a flex row (aligned to each other) whose height
+	 * matches one post-title row, so they sit on the same midline as the title.
+	 */
+	.month-meta {
+		/* keep in sync with .posts-nav a font/padding below */
+		--title-line: calc(0.8125rem * 1.35 + 0.28rem + 0.28rem);
+		flex: 0 0 var(--rail-col);
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.35rem;
+		box-sizing: border-box;
+		min-height: var(--title-line);
+		padding: 0;
+	}
+
+	.month-heading {
+		font-size: 0.625rem;
+		font-weight: 500;
+		letter-spacing: 0.03em;
+		line-height: 1.2;
+		text-align: right;
+		text-transform: uppercase;
+		color: var(--fg-subtle);
+		white-space: nowrap;
+	}
+
+	/*
+	 * In-flow flex item (not absolute). Sitting as the last child of a
+	 * full-width-to-rail row, translateX(50%) parks the center on the line.
+	 */
+	.rail-node {
+		display: block;
+		flex: 0 0 auto;
+		border-radius: 50%;
+		background: var(--fg-subtle);
+		box-shadow: 0 0 0 2px var(--bg);
+		transform: translateX(50%);
+		pointer-events: none;
+	}
+
+	.year-node {
+		width: var(--node-year);
+		height: var(--node-year);
+		background: var(--fg-muted);
+	}
+
+	.month-node {
+		width: var(--node-month);
+		height: var(--node-month);
 	}
 
 	.posts-nav li {
@@ -133,8 +305,8 @@ const viewBoxes: Record<string, string> = {
 
 	.posts-nav a {
 		display: block;
-		padding: 0.4rem 0.5rem 0.4rem 0;
-		font-size: 0.875rem;
+		padding: 0.28rem 0.15rem 0.28rem 0;
+		font-size: 0.8125rem;
 		line-height: 1.35;
 		color: var(--fg-muted);
 		text-decoration: none;
@@ -166,17 +338,16 @@ const viewBoxes: Record<string, string> = {
 		}
 
 		.posts-nav {
-			padding: 0.85rem 1.25rem 1rem;
+			padding: 0.85rem 1rem 1rem 1.15rem;
+			--rail-col: 2.5rem;
 		}
 
-		.posts-nav ul {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 0.15rem 0.75rem;
+		.month-group {
+			margin-bottom: 0.4rem;
 		}
 
 		.posts-nav a {
-			padding: 0.25rem 0;
+			padding: 0.25rem 0.15rem 0.25rem 0;
 		}
 	}
 </style>
