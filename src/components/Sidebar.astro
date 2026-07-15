@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_TITLE, SOCIAL_LINKS } from '../consts';
 
-const posts = (await getCollection('blog')).sort(
+const articles = (await getCollection('articles')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
@@ -12,7 +12,7 @@ const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short' });
 type MonthGroup = {
 	month: number;
 	label: string;
-	posts: CollectionEntry<'blog'>[];
+	articles: CollectionEntry<'articles'>[];
 };
 
 type YearGroup = {
@@ -22,8 +22,8 @@ type YearGroup = {
 
 const grouped: YearGroup[] = [];
 
-for (const post of posts) {
-	const date = post.data.pubDate;
+for (const article of articles) {
+	const date = article.data.pubDate;
 	const year = date.getFullYear();
 	const month = date.getMonth();
 
@@ -38,12 +38,12 @@ for (const post of posts) {
 		monthGroup = {
 			month,
 			label: monthFormatter.format(date),
-			posts: [],
+			articles: [],
 		};
 		yearGroup.months.push(monthGroup);
 	}
 
-	monthGroup.posts.push(post);
+	monthGroup.articles.push(article);
 }
 
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -82,8 +82,8 @@ const viewBoxes: Record<string, string> = {
 		</div>
 	</div>
 
-	<nav class="posts-nav" aria-label="Articles">
-		<p class="posts-label">Articles</p>
+	<nav class="articles-nav" aria-label="Articles">
+		<p class="articles-label">Articles</p>
 		<div class="timeline">
 			{
 				grouped.map((yearGroup) => (
@@ -94,14 +94,14 @@ const viewBoxes: Record<string, string> = {
 						</div>
 						{yearGroup.months.map((monthGroup) => (
 							<div class="month-group">
-								<ul class="post-list">
-									{monthGroup.posts.map((post) => {
-										const href = `/blog/${post.id}`;
+								<ul class="article-list">
+									{monthGroup.articles.map((article) => {
+										const href = `/${article.id}`;
 										const isActive = pathname === href || pathname === `${href}/`;
 										return (
 											<li>
 												<a href={`${href}/`} class:list={{ active: isActive }}>
-													{post.data.title}
+													{article.data.title}
 												</a>
 											</li>
 										);
@@ -168,7 +168,7 @@ const viewBoxes: Record<string, string> = {
 		text-decoration: none;
 	}
 
-	.posts-nav {
+	.articles-nav {
 		/* date column + room for rail dots past the line */
 		--rail-col: 2.75rem;
 		--node-year: 6px;
@@ -177,7 +177,7 @@ const viewBoxes: Record<string, string> = {
 		flex: 1;
 	}
 
-	.posts-label {
+	.articles-label {
 		margin: 0 0 0.85rem;
 		font-size: 0.6875rem;
 		font-weight: 500;
@@ -242,7 +242,7 @@ const viewBoxes: Record<string, string> = {
 		margin: 0 0 0.5rem;
 	}
 
-	.post-list {
+	.article-list {
 		flex: 1 1 auto;
 		min-width: 0;
 		list-style: none;
@@ -252,10 +252,10 @@ const viewBoxes: Record<string, string> = {
 
 	/*
 	 * Label + dot share a flex row (aligned to each other) whose height
-	 * matches one post-title row, so they sit on the same midline as the title.
+	 * matches one article-title row, so they sit on the same midline as the title.
 	 */
 	.month-meta {
-		/* keep in sync with .posts-nav a font/padding below */
+		/* keep in sync with .articles-nav a font/padding below */
 		--title-line: calc(0.8125rem * 1.35 + 0.28rem + 0.28rem);
 		flex: 0 0 var(--rail-col);
 		display: flex;
@@ -303,11 +303,11 @@ const viewBoxes: Record<string, string> = {
 		height: var(--node-month);
 	}
 
-	.posts-nav li {
+	.articles-nav li {
 		margin: 0;
 	}
 
-	.posts-nav a {
+	.articles-nav a {
 		display: block;
 		padding: 0.28rem 0.15rem 0.28rem 0;
 		font-size: 0.8125rem;
@@ -318,12 +318,12 @@ const viewBoxes: Record<string, string> = {
 		transition: color 0.15s ease;
 	}
 
-	.posts-nav a:hover {
+	.articles-nav a:hover {
 		color: var(--fg);
 		text-decoration: none;
 	}
 
-	.posts-nav a.active {
+	.articles-nav a.active {
 		color: var(--fg);
 		font-weight: 500;
 	}
@@ -341,7 +341,7 @@ const viewBoxes: Record<string, string> = {
 			margin-top: 0;
 		}
 
-		.posts-nav {
+		.articles-nav {
 			padding: 0.85rem 1rem 1rem 1.15rem;
 			--rail-col: 2.5rem;
 		}
@@ -350,7 +350,7 @@ const viewBoxes: Record<string, string> = {
 			margin-bottom: 0.4rem;
 		}
 
-		.posts-nav a {
+		.articles-nav a {
 			padding: 0.25rem 0.15rem 0.25rem 0;
 		}
 	}
