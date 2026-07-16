@@ -77,13 +77,15 @@ body {
 	max-width: var(--shell-max);
 	min-height: 100vh;
 	margin: 0 auto;
-	border-inline: var(--line);
+	/* Experiment: horizontal layout lines only (no vertical frame) */
+	/* border-inline: var(--line); */
 }
 
 .sidebar {
 	display: flex;
 	flex-direction: column;
-	border-right: var(--line);
+	/* Experiment: horizontal layout lines only (no vertical frame) */
+	/* border-right: var(--line); */
 	min-height: 100vh;
 	position: sticky;
 	top: 0;
