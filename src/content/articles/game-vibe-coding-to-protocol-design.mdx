@@ -52,10 +52,36 @@ At this point my OCD kicked in, I HAD to see if this was actually a good intuiti
 ## Designing the protocol
 > NOTE: this will be a very quick overview of the protocol foundations and how they are related to the ideas from the game, I'll probably work on a protocol specific article soon&trade;  
 
-The key ingredients that made the system click for me:
-
-
-At this point I was fully in my *psychosis* moment, trying to maximise usage as much as possible to make my idea a reality
+These are the core principles of the protocol that emerged from the game implementation
+- observable game state -> state tree  
+  Create a projection of the application data, this is not something new, we do it all the time when working with UIs, we take the data and create a visual representation for the user to consume. In this case the consumer is an LLM, so the representation is structured text.
+```
+[root] My Todos
+  [collection] Todos (count=2)
+    [todo] Write the SLOP article
+      completed: false
+    [todo] Publish the article
+      completed: false
+```
+- pushed game state -> application state mirror  
+  Tool calls can be slow and expensive, especially if they are blocking and cannot be batched. Reading the current state of the application fits exactly here, you cannot start doing something wiithout knowing what you are working with. Sending a projection of the current state of the system with the user's request allows the agent to skip this part. TODO
+- semantically contextualised actions to the state  
+  Actions are defined contextually on the data that they use, the model doesn't have to logically map it from a flat list of tools based on its name and interface, it's already there, semantically connected to the relevant part of the application state.
+```
+[root] My Todos
+  actions: add_todo(title: string)
+  [collection] Todos (count=2)
+    [todo] Write the SLOP article
+      completed: false
+      actions: complete, delete
+    [todo] Publish the article
+      completed: false
+      actions: complete, delete
+```
+- dynamically loaded actions  
+  TODO
+- consumer/provider split  
+  TODO
 
 ## Conclusion
 Don't be afraid of change, try to embrace it at your own pace. Ideas and intuitions are still king, good ideas start from solid foundations and understanding of all the involved systems, but we are at a point where the implementation, mostly, doesn't matter. It's time to "boil the ocean", you have the tools to do it.  
