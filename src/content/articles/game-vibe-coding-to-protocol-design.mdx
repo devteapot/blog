@@ -52,6 +52,7 @@ At this point my OCD kicked in, I HAD to see if this was actually a good intuiti
 ## Designing the protocol
 > NOTE: this will be a very quick overview of the protocol foundations and how they are related to the ideas from the game, I'll probably work on a protocol specific article soon&trade;  
 
+TODO
 These are the core principles of the protocol that emerged from the game implementation
 - observable game state -> state tree  
   Create a projection of the application data, this is not something new, we do it all the time when working with UIs, we take the data and create a visual representation for the user to consume. In this case the consumer is an LLM, so the representation is structured text.
@@ -72,8 +73,8 @@ These are the core principles of the protocol that emerged from the game impleme
   actions: add_todo(title: string)
   [collection] Todos (count=2)
     [todo] Write the SLOP article
-      completed: false
-      actions: complete, delete
+      completed: true
+      actions: mark_incomplete, delete
     [todo] Publish the article
       completed: false
       actions: complete, delete
