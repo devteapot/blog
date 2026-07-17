@@ -1,0 +1,312 @@
+---
+/**
+ * Hybrid NPC AI loop: local behavior tree for most decisions,
+ * LLM bridge for rare re-planning, reducers validate state writes.
+ */
+---
+
+<figure class="diagram" aria-label="Hybrid NPC AI architecture">
+    <div class="diagram-canvas" role="img" aria-labelledby="hybrid-npc-caption">
+        <svg
+            class="diagram-svg"
+            viewBox="0 0 700 260"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <defs>
+                <marker
+                    id="arr"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                >
+                    <path d="M 1 1 L 9 5 L 1 9 z" class="arrow-fill"></path>
+                </marker>
+                <marker
+                    id="arr-muted"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                >
+                    <path d="M 1 1 L 9 5 L 1 9 z" class="arrow-fill muted"
+                    ></path>
+                </marker>
+            </defs>
+
+            <!-- State → Tree -->
+            <path class="edge" d="M168 72 H228" marker-end="url(#arr)"></path>
+            <text class="label" x="200" y="90" text-anchor="middle"
+                >push state</text
+            >
+
+            <!-- Tree → State (local hot path, under the pair) -->
+            <path
+                class="edge"
+                d="M250 100 V128 H116 V100"
+                marker-end="url(#arr)"></path>
+            <text class="label" x="183" y="147" text-anchor="middle"
+                >real-time actions</text
+            >
+
+            <!-- Tree ⇢ LLM -->
+            <path
+                class="edge dashed"
+                d="M388 72 H498"
+                marker-end="url(#arr-muted)"></path>
+            <text class="label muted" x="443" y="90" text-anchor="middle"
+                >rare decision pushed</text
+            >
+
+            <!-- LLM ⇢ Validate -->
+            <path
+                class="edge dashed"
+                d="M570 100 V188 H392"
+                marker-end="url(#arr-muted)"></path>
+            <text class="label muted" x="582" y="150" text-anchor="start"
+                >new tree</text
+            >
+
+            <!-- Validate → State (outer return on the left) -->
+            <path class="edge" d="M228 188 H52 V100" marker-end="url(#arr)"
+            ></path>
+            <text class="label" x="128" y="208" text-anchor="middle"
+                >state change</text
+            >
+
+            <!-- Nodes -->
+            <g class="node">
+                <rect x="28" y="44" width="140" height="56" rx="6"></rect>
+                <text class="title" x="98" y="68" text-anchor="middle"
+                    >SpacetimeDB</text
+                >
+                <text class="sub" x="98" y="84" text-anchor="middle">state</text
+                >
+            </g>
+
+            <g class="node primary">
+                <rect x="232" y="44" width="156" height="56" rx="6"></rect>
+                <text class="title" x="310" y="68" text-anchor="middle"
+                    >Behavior tree</text
+                >
+                <text class="sub" x="310" y="84" text-anchor="middle"
+                    >dispatch actions</text
+                >
+            </g>
+
+            <g class="node accent">
+                <rect x="502" y="44" width="140" height="56" rx="6"></rect>
+                <text class="title" x="572" y="68" text-anchor="middle"
+                    >LLM bridge</text
+                >
+                <text class="sub" x="572" y="84" text-anchor="middle"
+                    >rare path</text
+                >
+            </g>
+
+            <g class="node">
+                <rect x="232" y="164" width="156" height="48" rx="6"></rect>
+                <text class="title" x="310" y="193" text-anchor="middle"
+                    >Reducers validate</text
+                >
+            </g>
+        </svg>
+
+        <div class="diagram-stack" aria-hidden="true">
+            <div class="stack-node">
+                <span class="stack-title">SpacetimeDB state</span>
+            </div>
+            <span class="stack-edge">feeds</span>
+            <div class="stack-node primary">
+                <span class="stack-title">Behavior tree</span>
+                <span class="stack-sub">most decisions run locally → state</span
+                >
+            </div>
+            <span class="stack-edge dashed">rare decision pushed</span>
+            <div class="stack-node accent">
+                <span class="stack-title">LLM bridge</span>
+                <span class="stack-sub">new tree or response</span>
+            </div>
+            <span class="stack-edge">validated</span>
+            <div class="stack-node">
+                <span class="stack-title">Reducers validate</span>
+                <span class="stack-sub">state change → SpacetimeDB</span>
+            </div>
+        </div>
+    </div>
+    <figcaption id="hybrid-npc-caption" class="diagram-caption">
+        Hybrid loop: deterministic trees for the hot path, LLM only when the
+        entity needs a new plan.
+    </figcaption>
+</figure>
+
+<style>
+    .diagram {
+        margin: 0 0 1.75rem;
+        padding: 0;
+    }
+
+    .diagram-canvas {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-elevated);
+        padding: 1.35rem 1rem 1.1rem;
+        overflow: hidden;
+    }
+
+    .diagram-svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .diagram-svg .node rect {
+        fill: var(--bg);
+        stroke: var(--border);
+        stroke-width: 1;
+    }
+
+    .diagram-svg .node.primary rect {
+        stroke: var(--fg-muted);
+    }
+
+    .diagram-svg .node.accent rect {
+        stroke: var(--fg-subtle);
+        stroke-dasharray: 3.5 2.5;
+    }
+
+    .diagram-svg .title {
+        fill: var(--fg);
+        font-family:
+            var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.015em;
+    }
+
+    .diagram-svg .sub {
+        fill: var(--fg-subtle);
+        font-family: var(--font-geist-mono), ui-monospace, monospace;
+        font-size: 10.5px;
+        font-weight: 400;
+    }
+
+    .diagram-svg .edge {
+        stroke: var(--border-hover);
+        stroke-width: 1.25;
+        fill: none;
+    }
+
+    .diagram-svg .edge.dashed {
+        stroke: var(--fg-subtle);
+        stroke-dasharray: 4.5 3.5;
+    }
+
+    .diagram-svg .label {
+        fill: var(--fg-muted);
+        font-family:
+            var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+        font-size: 10.5px;
+        font-weight: 400;
+    }
+
+    .diagram-svg .label.muted {
+        fill: var(--fg-subtle);
+    }
+
+    .diagram-svg .arrow-fill {
+        fill: var(--border-hover);
+    }
+
+    .diagram-svg .arrow-fill.muted {
+        fill: var(--fg-subtle);
+    }
+
+    .diagram-stack {
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+        padding: 0.1rem 0.35rem 0.15rem;
+    }
+
+    .stack-node {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg);
+        padding: 0.7rem 0.85rem;
+    }
+
+    .stack-node.primary {
+        border-color: var(--fg-muted);
+    }
+
+    .stack-node.accent {
+        border-style: dashed;
+        border-color: var(--fg-subtle);
+    }
+
+    .stack-title {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: var(--fg);
+    }
+
+    .stack-sub {
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.6875rem;
+        font-family: var(--font-geist-mono), ui-monospace, monospace;
+        color: var(--fg-subtle);
+        line-height: 1.4;
+    }
+
+    .stack-edge {
+        display: block;
+        padding: 0.1rem 0.15rem;
+        font-size: 0.6875rem;
+        color: var(--fg-subtle);
+        text-align: center;
+        letter-spacing: 0.01em;
+    }
+
+    .stack-edge.dashed {
+        font-style: italic;
+    }
+
+    .stack-edge::before {
+        content: "↓ ";
+        color: var(--border-hover);
+    }
+
+    .diagram-caption {
+        margin: 0.65rem 0 0;
+        padding: 0 0.1rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: var(--fg-subtle);
+    }
+
+    @media (max-width: 560px) {
+        .diagram-svg {
+            display: none;
+        }
+
+        .diagram-stack {
+            display: flex;
+        }
+
+        .diagram-canvas {
+            padding: 0.85rem 0.5rem;
+        }
+    }
+</style>
