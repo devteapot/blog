@@ -8,54 +8,54 @@ import HybridNpcFlow from '../../components/diagrams/HybridNpcFlow.astro';
 
 > NOTE: this is my first article so bear with me as I get better at writing, I appreciate it.  
 
-## Why was I vibe coding an LLM-based MMO ?
-Why not ? duh.  
+## Why was I vibe coding an LLM-based MMO?
+Why not? Duh.  
 
 I was originally what you would call an "AI hater" up to, like for many people, the start of this year. I ended up doing a full 180 on that, becoming fully AI-pilled: local models, inference engines, agent harnesses, etc... the whole package, but that's a story for another time.  
 
-The [release of Opus 4.5](https://www.anthropic.com/news/claude-opus-4-5) was truly a pivotal moment, I have to reluctantly give Anthropic that, it made me realise that these models might actually be useful *tools* for software engineering even tho, like most engineers, I struggled to come to terms with the fact that the skills I worked hard for were becoming partially useless (even if they don't realise/admit it).
+The [release of Opus 4.5](https://www.anthropic.com/news/claude-opus-4-5) was truly a pivotal moment. I have to reluctantly give Anthropic that. It made me realise that these models might actually be useful *tools* for software engineering even tho, like most engineers, I struggled to come to terms with the fact that the skills I worked hard for were becoming partially useless (even if they don't realise/admit it).
 Before that, the whole tab autocomplete and sub-par code generation was just uninteresting to me.  
 
-What does this have to do with this article ? EVERYTHING. This is my first fully vibe coded project.  
+What does this have to do with this article? EVERYTHING. This is my first fully vibe-coded project.  
 
-Earlier that year (2025) I got hit by the infamous layoff hammer, and it hurt, like a lot. I found myself stuck in the current job market purgatory, aimlessly applying to every open position under the sun, blaming the "system" and honestly just being miserable.  
+The previous year (2025) I got hit by the infamous layoff hammer, and it hurt, like a lot. I found myself stuck in the current job market purgatory, aimlessly applying to every open position under the sun, blaming the "system" and honestly just being miserable.  
 Luckily, after some months, the monkey in my brain decided to lock in, it was time to look at the future. I wanted to see what I was able to achieve trying to maximise the usage of this new shiny *tool*.  
 
 I have always been what some may call a "nerd", before it was cool, not even sure it is actually cool. I was frustrated by the fact that there are no good "new" MMOs, I really liked the premise of these games, but the lack of current-gen titles always precluded me from actually playing one.  
-Maybe that's for the best, knowing me, i'd get addicted.  
+Maybe that's for the best, knowing me, I'd get addicted.  
 
-Given this and my newfound hunger in learning something new I ended up working on my game [SAO: Slop Art Online](https://github.com/devteapot/slop-art-online). Hey, listen..., this was the funniest stuff ever when I got the idea, don't judge me. For those who don't get it, maybe it's for the best.
+Given this and my newfound hunger to learn something new I ended up working on my game [SAO: Slop Art Online](https://github.com/devteapot/slop-art-online). Hey, listen..., this was the funniest stuff ever when I got the idea, don't judge me. For those who don't get it, maybe it's for the best.
 
 ## How did I get from a slop MMO game to designing a protocol?
 By chance.  
 
-For my first "real" game I made some non-optimal choices on my tech stack: [Rust](https://rust-lang.org/), [Bevy](https://bevy.org/) and [SpacetimeDB](https://spacetimedb.com/). Don't get me wrong, they are amazing, but not necessarily what I would suggest to someone new to game development.  
-This was intentional tho, I wanted to maximise the friction between me and the low-level understanding of what I was building, nothing personal my fellow rustaceans. The only real major downside is that you don't get to rewrite your project to Rust if you use Rust to begin with.  
+For my first "real" game I made some non-optimal choices for my tech stack: [Rust](https://rust-lang.org/), [Bevy](https://bevy.org/) and [SpacetimeDB](https://spacetimedb.com/). Don't get me wrong, they are amazing, but not necessarily what I would suggest to someone new to game development.  
+This was intentional tho, I wanted to maximise the friction between me and the low-level understanding of what I was building, nothing personal my fellow Rustaceans. The only real major downside is that you don't get to rewrite your project to Rust if you use Rust to begin with.  
 
 The core idea of the game is an MMO where NPCs are treated and modelled the same as players, the only difference being they are controlled by LLMs instead of humans.  
-This is valid for all intelligent entities in the game, from merchants, guards and politicians to mobs of all kinds like animals and monsters.
+This applies to all intelligent entities in the game, from merchants, guards and politicians to mobs of all kinds like animals and monsters.
 
 I started from the naive approach: send a player-scoped snapshot of the currently observable world and actionable tools to the LLM and wait for it to answer with an action. This works, but of course doesn't scale to a game with real-time mechanics like combat.  
 
-The first idea I had to solve the latency issue was fine-tuning a small model on gameplay traces, but it felt out of reach and expensive considering that the game mechanics are not set in stone. No matter how much I could optimise the inference it would never feel real-time, I needed to approach this differently.  
+The first idea I had to solve the latency issue was fine-tuning a small model on gameplay traces, but it felt out of reach and expensive considering that the game mechanics are not set in stone. No matter how much I could optimise the inference, it would never feel real-time. I needed to approach this differently.  
 
-A hybrid approach on how the AI of the NPCs worked is where I landed, start with a default behaviour tree  based on the type of entity, use the LLM to re-generate the tree as the player "experiences" things in the game. This combines the best of both worlds, instant execution of deterministic behaviour and situational adaptability of slow non-deterministic LLMs.
+I landed on a hybrid approach to NPC AI: start with a default behaviour tree based on the type of entity, then use the LLM to regenerate the tree as the NPC "experiences" things in the game. This combines the best of both worlds: instant execution of deterministic behaviour and situational adaptability of slow, non-deterministic LLMs.
 
 <HybridNpcFlow />
 
-Thanks to the push-based architecture of SpacetimeDB, we always get a fresh game state from the subscription for the LLM call. This state contains the actual state of the observable world and the available actions, everything was contextualised, actions semantically connected to the state, this was the breaking point for me.  
+Thanks to the push-based architecture of SpacetimeDB, the bridge always has a fresh game state for each LLM call. This includes the observable world and the available actions: everything is contextualised, with actions semantically connected to the state. This was the breaking point for me.  
 
-Why isn't MCP like this ? Why do we expose a flat list of tools instead of a push based state projection with contextualised actions ? Why are we using visual tools to let LLMs use interfaces made for humans ? How would an agent first interface look like ?  
+Why isn't MCP like this? Why do we expose a flat list of tools instead of a push-based state projection with contextualised actions? Why are we using visual tools to let LLMs use interfaces made for humans? What would an agent-first interface look like?  
 
 At this point my OCD kicked in, I HAD to see if this was actually a good intuition.
 
 ## Designing the protocol
-> NOTE: this will be a very quick overview of the protocol foundations and how they are related to the ideas from the game, I'll probably work on a protocol specific article soon&trade;  
+> NOTE: this will be a very quick overview of the protocol foundations and how they are related to the ideas from the game, I'll probably work on a protocol-specific article soon&trade;  
 
-TODO
-These are the core principles of the protocol that emerged from the game implementation
+I knew there were enough good ideas in the design of this system to build a reliable and efficient way for agents to interact with applications in a standardised way. I just needed to isolate, generalise and understand how to properly integrate them in a coherent [specification](https://github.com/devteapot/slop/tree/main/spec).
+
 - observable game state -> state tree  
-  Create a projection of the application data, this is not something new, we do it all the time when working with UIs, we take the data and create a visual representation for the user to consume. In this case the consumer is an LLM, so the representation is structured text.
+  Create a projection of the application data. This is not something new, we do it all the time when working with UIs. We take the data and create a visual representation for the user to consume. In this case, the consumer is an LLM, so the representation is structured text.
 ```
 [root] My Todos
   [collection] Todos (count=2)
@@ -65,9 +65,10 @@ These are the core principles of the protocol that emerged from the game impleme
       completed: false
 ```
 - pushed game state -> application state mirror  
-  Tool calls can be slow and expensive, especially if they are blocking and cannot be batched. Reading the current state of the application fits exactly here, you cannot start doing something wiithout knowing what you are working with. Sending a projection of the current state of the system with the user's request allows the agent to skip this part. TODO
-- semantically contextualised actions to the state  
-  Actions are defined contextually on the data that they use, the model doesn't have to logically map it from a flat list of tools based on its name and interface, it's already there, semantically connected to the relevant part of the application state.
+  Tool calls can be slow and expensive, especially if they are blocking and cannot be batched. Reading the current state of the application fits exactly here: you cannot start doing something without knowing what you are working with. Sending a projection of the current state with the user's request allows the agent to skip this step.  
+  I see this agent-specific interface as parallel to UIs, ensuring a fresh state every time means that user interactions are immediately available on the agent's next turn.
+- actions semantically contextualised by the state  
+  Actions are defined contextually on the data that they use. The model doesn't have to logically map them from a flat list of tools based on their names and interfaces. They are already there, semantically connected to the relevant application state.
 ```
 [root] My Todos
   actions: add_todo(title: string)
@@ -80,10 +81,23 @@ These are the core principles of the protocol that emerged from the game impleme
       actions: complete, delete
 ```
 - dynamically loaded actions  
-  TODO
+  Actions are loaded dynamically into the agent context based on the application state. If an action cannot be performed given the current state, the provider can choose not to load it or give additional info on how to proceed.
 - consumer/provider split  
-  TODO
+  In the game, the server provides each player with a scoped view of the game state. The protocol generalises this idea: an application uses a provider to expose scoped application state to a consumer. The two are completely decoupled. The provider handles the application logic, while the consumer handles the snapshot updates and how the state is exposed to the LLM. They only agree on how they communicate: the protocol.
+
+After a quick validation of this core idea, it was interesting enough to me to be worth exploring more in depth. I started working on speccing out finer and finer details, SDKs, examples, possible limitations, benchmarks and so on. Even tho it would probably sit unused in the sea of *SLOP* created in this AI era, I wanted to see it through. I wanted to release it publicly.  
+
+For this app\<->model interaction problem, I still think MCP and computer use fail to completely fill the gap. I wanted to share my take on it and see if it would resonate with someone else.  
+
+Unfortunately, this meant that the game got the *side project special*, aka currently rotting in my GH graveyard of unfinished projects. But never say never. Now that the first version of the protocol is released, stable and somewhat validated by my custom agent runtime, I might have time to get back to it and see if I can actually make something even remotely playable.
 
 ## Conclusion
-Don't be afraid of change, try to embrace it at your own pace. Ideas and intuitions are still king, good ideas start from solid foundations and understanding of all the involved systems, but we are at a point where the implementation, mostly, doesn't matter. It's time to "boil the ocean", you have the tools to do it.  
-I still see a role for hand-written code, but It's more artistic than functional, remember we are still at the beginning and these tools are only going to get better. Or maybe not, what do I know.
+Don't be afraid of change, try to embrace it at your own pace. Ideas and intuitions are still king. Good ideas come from solid foundations, exposing yourself to new things and understanding the systems involved. But I think we are at a point where the implementation, mostly, doesn't matter. It's time to "boil the ocean", you have the tools to do it.  
+I still see a role for hand-written code, but it's more artistic than functional. Remember, we are still at the beginning, and these tools are only going to get better. Or maybe not, what do I know.
+
+---
+
+### Links
+
+Game: [github.com/devteapot/slop-art-online](https://github.com/devteapot/slop-art-online)  
+Protocol: [slopai.dev](https://slopai.dev) - [demo](https://demo.slopai.dev) - [github.com/devteapot/slop](https://github.com/devteapot/slop)
