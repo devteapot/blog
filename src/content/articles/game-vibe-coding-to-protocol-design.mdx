@@ -65,8 +65,7 @@ I knew there were enough good ideas in the design of this system to build a reli
       completed: false
 ```
 - pushed game state -> application state mirror  
-  Tool calls can be slow and expensive, especially if they are blocking and cannot be batched. Reading the current state of the application fits exactly here: you cannot start doing something without knowing what you are working with. Sending a projection of the current state with the user's request allows the agent to skip this step.  
-  I see this agent-specific interface as parallel to UIs, ensuring a fresh state every time means that user interactions are immediately available on the agent's next turn.
+  Tool calls can be slow and expensive, especially if they are blocking and cannot be batched. Reading the current state of the application fits exactly here: you cannot start doing something without knowing what you are working with. Sending a projection of the current state with the user's request allows the agent to skip this step. I see this agent-specific interface as parallel to UIs, ensuring a fresh state every time means that user interactions are immediately available on the agent's next turn.
 - actions semantically contextualised by the state  
   Actions are defined contextually on the data that they use. The model doesn't have to logically map them from a flat list of tools based on their names and interfaces. They are already there, semantically connected to the relevant application state.
 ```
