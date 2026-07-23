@@ -6,10 +6,19 @@ import FormattedDate from '../components/FormattedDate.astro';
 
 type Props = CollectionEntry<'articles'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, heroImage } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} image={heroImage} pageTitle={title}>
+<BaseLayout
+	title={title}
+	description={description}
+	image={heroImage}
+	pageTitle={title}
+	pageType="article"
+	pubDate={pubDate}
+	updatedDate={updatedDate}
+	tags={tags}
+>
 	<article>
 		{
 			heroImage && (
